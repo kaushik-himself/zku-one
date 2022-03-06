@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
 
-include "../node_modules/circomlib/circuits/mimc.circom";
+include "../node_modules/circomlib/circuits/mimcsponge.circom";
 
 // Helper template that computes hashes of the next tree layer
 template TreeLayer(height) {
@@ -10,11 +10,11 @@ template TreeLayer(height) {
 
   component hash[nItems];
   for(var i = 0; i < nItems; i++) {
-    hash[i] = MultiMiMC7(2,91);
-    hash[i].in[0] <== ins[i * 2];
-    hash[i].in[1] <== ins[i * 2 + 1];
+    hash[i] = MiMCSponge(2, 220, 1);
+    hash[i].ins[0] <== ins[i * 2];
+    hash[i].ins[1] <== ins[i * 2 + 1];
     hash[i].k <== 0;
-    hash[i].out ==> outs[i];
+    hash[i].outs[0] ==> outs[i];
   }
 }
 
