@@ -41,11 +41,19 @@ contract MerkleTree {
         return keccak256(abi.encodePacked(sender, receiver, tokenId, tokenURI));
     }
 
+    // Update the Merkle Tree with minimal number of hashing steps.
+    // When a new leaf is added, only the tree nodes in the path from the leaf to the
+    // root need to be updated with the hash of their child nodes.
+    //
+    // When a tree is stored in the form of an array, the parent of a node at index'i'
+    // can be found at 'leafLen + i/2', where leafLen is the number of tree leaves.
+    //
+    // This process of updating a node's parent is carried on until we reach the root
+    // node.
     function updateTree(bytes32 nftHash) private {
         tree[filledLeaves] = nftHash;
         uint256 idx = filledLeaves++;
         while (idx < tree.length - 1) {
-            // the issue is here - need to store offset
             if (idx % 2 == 0) {
                 tree[leafLen + idx / 2] = keccak256(
                     abi.encodePacked(tree[idx], tree[idx + 1])
