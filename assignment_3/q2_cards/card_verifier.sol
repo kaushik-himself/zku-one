@@ -357,6 +357,8 @@ contract Cards {
         uint256[2] memory c,
         uint256[1] memory input
     ) public view returns (bool r) {
+        // Check that the stored value of the card matches with the output of the proof,
+        // preventing the player from spoofing the first card.
         require(
             cards[msg.sender] == bytes32(input[0]),
             "Card did not match stored card"

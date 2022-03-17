@@ -1,4 +1,11 @@
 /*
+A card is represented simply by a number from [0-51] (inclusive).
+Each consecutive set of 13 numbers can indicate cards of a single suit.
+For example, 0-12 (inclusive) can be spades,
+13-25 clubs,
+26-38 diamonds,
+39-51 hearts.
+
 Prove that the 2 cards passed belong to the same suit - i.e. they are
 bound by the same multiple of 13.
 
@@ -30,7 +37,7 @@ template IsInRange() {
     upperBound.in[1] <== rangeEnd;
 
     // If both upper bound and lower bound are true, the val is in range.
-    // out will be set to 1 iff both upperBound and lowerBound check return 1's.
+    // out will be set to 1 if and only if both upperBound and lowerBound check return 1's.
     out <== lowerBound.out * upperBound.out;
 }
 
@@ -38,8 +45,13 @@ template IsInRange() {
 template MarkSuit() {
     signal input val;
 
+    // Add one entry in 'out' for each suit.
+    // if out[i] is 1 => the value belongs to the i'th suit.
     signal output out[4];
 
+    // Check for each range of 13 if the value falls in that range.
+    // If it does, set the corresponding out to 1.
+    // Else, set the corresponding out to 0.
     component inRange1 = IsInRange();
     inRange1.val <== val;
     inRange1.rangeStart <== 0;
@@ -75,21 +87,31 @@ template IsSameSuit() {
 
     signal output hashedCard1;
 
+    // Both the cards should have a valid value, [0-51].
     assert(card1 >= 0);
     assert(card2 >= 0);
     assert(card1 < 52);
     assert(card2 < 52);
 
+    // Mark the suit for both the cards.
     component multiRange1 = MarkSuit();
     multiRange1.val <== card1;
 
     component multiRange2 = MarkSuit();
     multiRange2.val <== card2;
 
+    // Check that the suit matches.
     for (var i = 0; i < 4; i++) {
         multiRange1.out[i] === multiRange2.out[i];
     }
 
+    /* Output the value of the first card hashed with the secret seed.
+      
+       - Hashing with a secret seed ensures that the card's value is not revealed.
+       - The output is verified by the smart contract with the card value stored by it
+       to ensure that the player has not spoofed the value of the first card while
+       generating the proof.
+    */
     component mimc = MiMCSponge(2, 220, 1);
     mimc.ins[0] <== card1;
     mimc.ins[1] <== seed;
