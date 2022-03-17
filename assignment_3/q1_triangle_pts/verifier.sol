@@ -349,23 +349,21 @@ contract Verifier {
 }
 
 contract Location {
-    uint256[3] location;
     Verifier verifier;
 
     constructor() public {
         verifier = new Verifier();
     }
 
-    function updateLocation(
+    function verifyTriangleLocation(
         uint256[2] memory a,
         uint256[2][2] memory b,
         uint256[2] memory c,
         uint256[3] memory input
-    ) public {
+    ) public view {
         require(
             verifier.verifyProof(a, b, c, input),
             "Snark proof of triangle location failed"
         );
-        location = input;
     }
 }
